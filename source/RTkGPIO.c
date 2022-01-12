@@ -24,7 +24,6 @@ typedef struct WiringRTkHandle {
 	unsigned int microseconds;
 } WiringRTkHandle;
 
-
 //RTk pinmap Physical, BCM, wiringPi 
 const int PINMAP[NUMPINS][3] =
 	{
@@ -71,7 +70,7 @@ WiringRTkHandle *rtk_getRTkHandle() {
 
 //close rtk serial device and cleanup wiringRTk
 void RTk_closeWiringRTk() {
-	WiringRTkHandle *rtk = getRTkHandle();
+	WiringRTkHandle *rtk = rtk_getRTkHandle();
 	if(rtk->isSetup == 1) {
 		closeRTk(rtk->serialDevice);
 		free(rtk->serialDevicePath);
@@ -82,7 +81,7 @@ void RTk_closeWiringRTk() {
 //return pin RTk.GPIO api value from setup pinmap
 int rtk_getChannel(int pin) {
 	int i;
-	WiringRTkHandle *rtk = getRTkHandle();
+	WiringRTkHandle *rtk = rtk_getRTkHandle();
 	for(i = 0; i < NUMPINS; i++) {
 		if(PINMAP[i][rtk->pinLayout] == pin) {
 			return (PINMAP[i][BCM] + CHSTART);
@@ -136,27 +135,30 @@ int rtk_getValueOutput(int value) {
 
 //setup pin for INPUT or OUTPUT
 void RTk_pinMode(int pin, int mode) {
-	char ret;
-	WiringRTkHandle *rtk = getRTkHandle();
-	ret = rtk_getChannel(pin);
-	ret = rtkWrite(rtk->serialDevice, ret);
-	ret = rtk_getMode(mode);
-	ret = rtkWrite(rtk->serialDevice, ret);
+	int WRITE_SIZE = 2;
+	char *buffer = (char*) malloc(WRITE_SIZE);
+	WiringRTkHandle *rtk = rtk_getRTkHandle();
+	buffer[0] = (char) rtk_getChannel(pin);
+	buffer[1] = (char) rtk_getMode(mode);
+	int ret = rtkWriteMultiple(rtk->serialDevice, buffer, WRITE_SIZE);
+	if(ret < WRITE_SIZE) {fprintf(stderr, "RTk serial write failed");}
+	free(buffer);
 	RTk_pullUpDnControl(pin, PUD_OFF);
+	RTk_digitalWrite(pin, LOW);
 }
 
 //return whether input pin is HIGH or LOW
 int RTk_digitalRead(int pin) {
 	int ret, channel;
 	char buffer[DIGITAL_READ_SIZE];
-	WiringRTkHandle *rtk = getRTkHandle();
-	channel = getChannel(pin);
+	WiringRTkHandle *rtk = rtk_getRTkHandle();
+	channel = rtk_getChannel(pin);
 	ret = rtkWrite(rtk->serialDevice, channel);
 	ret = rtkWrite(rtk->serialDevice, GPIO_READ);
 	rtkRead(rtk->serialDevice, buffer, sizeof(buffer));
 	printf("%d %d %d %d\n", buffer[0], buffer[1], buffer[2], buffer[3]);
 	if(buffer[0] == channel) {
-		return getValueInput(buffer[1]);
+		return rtk_getValueInput(buffer[1]);
 	}
 	return -1;
 	
@@ -168,17 +170,24 @@ void RTk_digitalWrite(int pin, int value) {
 	WiringRTkHandle *rtk = rtk_getRTkHandle();
 	ret = rtk_getChannel(pin);
 	ret = rtkWrite(rtk->serialDevice, ret);
+	if(ret < 1) goto write_failed;
 	ret = rtkWrite(rtk->serialDevice, rtk_getValueOutput(value));
+	if(ret < 1) goto write_failed;
+	return;
+	write_failed:
+		fprintf(stderr, "RTk serial write failed");
 }
 
 //set pull up, down or no resistor on pin
 void RTk_pullUpDnControl(int pin, int pud) {
-	char ret;
+	int WRITE_SIZE = 2;
+	char *buffer = (char*) malloc(WRITE_SIZE);
 	WiringRTkHandle *rtk = rtk_getRTkHandle();
-	ret = rtk_getChannel(pin);
-	ret = rtkWrite(rtk->serialDevice, ret);
-	ret = rtk_getPUD(pud);
-	ret = rtkWrite(rtk->serialDevice, ret);
+	buffer[0] = (char) rtk_getChannel(pin);
+	buffer[1] = rtk_getPUD(pud);
+	int ret = rtkWriteMultiple(rtk->serialDevice, buffer, WRITE_SIZE);
+	if(ret < WRITE_SIZE) {fprintf(stderr, "RTk serial write failed");}
+	free(buffer);
 }
 
 //get time since any setup functions called in milliseconds

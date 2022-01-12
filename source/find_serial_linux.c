@@ -14,10 +14,10 @@
 
 
 //return USB id value from file path.
-int getID(char* path, char* file) {
+int getID(char *path, char *file) {
 	unsigned int hwid = 0;
 	FILE *idFile;
-	char* buffer = calloc(PATH_MAX + 1, sizeof(char));
+	char *buffer = calloc(PATH_MAX + 1, sizeof(char));
 	if(buffer == NULL) {fprintf(stderr, "calloc failed\n"); exit(1);}
 	strcat(buffer, path);
 	strcat(buffer, "/");
@@ -38,15 +38,15 @@ int getID(char* path, char* file) {
 
 //checks if serial device matchs RTk.GPIO vender and product id
 //return 1 if RTk found, 0 if not
-int identifyRTk(char* device) {
-	char* path, device_path, usb_device_path;
+int identifyRTk(char *device) {
+	char *path, *device_path, *usb_device_path;
 	int idVendor, idProduct;
 	path = malloc(PATH_MAX + 1);
 	if(path == NULL) {fprintf(stderr, "malloc failed\n"); exit(1);}
 	strcpy(path, PATH_TO_SERIAL_DEVICES);
-	device_path = malloc(PATH_MAX + 1);
+	device_path = (char*) malloc(PATH_MAX + 1);
 	if(device_path == NULL) {fprintf(stderr, "malloc failed\n"); exit(1);}
-	usb_device_path = malloc(PATH_MAX + 1);
+	usb_device_path =  (char*) malloc(PATH_MAX + 1);
 	if(usb_device_path == NULL) {fprintf(stderr, "malloc failed\n"); exit(1);}
 	strcat(path, device);
 	strcat(path, DEVICE);
@@ -72,7 +72,7 @@ int identifyRTk(char* device) {
 
 //list serial devices and identify RTk.GPIO by vendor/ product id
 //path should be size PATH_MAX + 1
-int getSerial(char* path) {
+int getSerial(char *path) {
 	int i = 0;
 	glob_t serial_list;
 	glob(USBSERIAL, 0, NULL, &serial_list);

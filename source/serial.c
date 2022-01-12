@@ -7,8 +7,13 @@
 
 //write byte to serial return number of bytes successfully written.
 int rtkWrite(int serialDevice, char byte) {
-	printf("%d\n", byte);
+	// printf("%c\n", byte);
 	return write(serialDevice, &byte, sizeof(char));
+}
+
+int rtkWriteMultiple(int serialDevice, char* buffer, int size) {
+	// printf("%c%c\n", buffer[0], buffer[1]);
+	return write(serialDevice, buffer, size);
 }
 
 //reads size number of bytes into buffer returns number of bytes read.
@@ -28,6 +33,6 @@ int getRTk(char* serialPath) {
 	if(getSerial(serialPath) != 0) {return -1;}
 	serial = openSerial(serialPath);
 	if(serial == -1) {return -2;}
-	if(setupSerial(serial < 0)) {close(serial); return -3;}
+	if(setupSerial(serial) < 0) {close(serial); return -3;}
 	return serial;
 }

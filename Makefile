@@ -17,24 +17,36 @@ ifeq ($(UNAME_S),Darwin)
 endif
 
 CC=gcc
-CFLAGS=
+CFLAGS= -g
 LIBS= $(FIND_SERIAL_LIBS)
 INCLUDE=
 SHAREDLIB= -shared
+FPIC = -fPIC
+ARCHIVER = ar
+ARCHIVER_ARGS = rcs
 
-all:wiringRTk.so RTkGPIO.so
+all:wiringRTk.so RTkGPIO.so libwiringRTk.a libRTkGPIO.a
 
-wiringRTk.so: checkbin wiringRTk.o RTkGPIO.o serial.o serial_posix.o find_serial.o delay.o
-		$(CC) $(CFLAGS) $(SHAREDLIB) build/wiringRTk.o build/RTkGPIO.o build/serial.o build/serial_posix.o build/find_serial.o build/delay.o $(LIBS) -o bin/wiringRTk.so
+wiringRTk.so: checkbin wiringRTk.o RTkGPIO_SHARED.o serial.o serial_posix.o find_serial.o delay.o
+		$(CC) $(CFLAGS) $(SHAREDLIB) build/wiringRTk.o build/RTkGPIO_SHARED.o build/serial.o build/serial_posix.o build/find_serial.o build/delay.o $(LIBS) -o bin/wiringRTk.so
 
-RTkGPIO.so: checkbin RTkGPIO.o serial.o serial_posix.o find_serial.o delay.o
-		$(CC) $(CFLAGS) $(SHAREDLIB) build/RTkGPIO.o build/serial.o build/serial_posix.o build/find_serial.o build/delay.o $(LIBS) -o bin/wiringRTk.so
+RTkGPIO.so: checkbin RTkGPIO_SHARED.o serial.o serial_posix.o find_serial.o delay.o
+		$(CC) $(CFLAGS) $(SHAREDLIB) build/RTkGPIO_SHARED.o build/serial.o build/serial_posix.o build/find_serial.o build/delay.o $(LIBS) -o bin/RTkGPIO.so
+
+libwiringRTk.a: checkbin wiringRTk.o RTkGPIO_STATIC.o serial.o serial_posix.o find_serial.o delay.o
+		$(ARCHIVER) $(ARCHIVER_ARGS) bin/libwiringRTk.a build/wiringRTk.o build/RTkGPIO_STATIC.o build/serial.o build/serial_posix.o build/find_serial.o build/delay.o $(LIBS)
+
+libRTkGPIO.a: checkbin RTkGPIO_STATIC.o serial.o serial_posix.o find_serial.o delay.o
+		$(ARCHIVER) $(ARCHIVER_ARGS) bin/libRTkGPIO.a build/RTkGPIO_STATIC.o build/serial.o build/serial_posix.o build/find_serial.o build/delay.o $(LIBS)  
 
 wiringRTk.o: checkbuild source/wiringRTk.c
 		$(CC) $(CFLAGS) -c source/wiringRTk.c $(INCLUDE) -o build/wiringRTk.o
 
-RTkGPIO.o: checkbuild source/RTkGPIO.c
-		$(CC) $(CFLAGS) -c source/RTkGPIO.c $(INCLUDE) -o build/RTkGPIO.o
+RTkGPIO_STATIC.o: checkbuild source/RTkGPIO.c
+		$(CC) $(CFLAGS) -c source/RTkGPIO.c $(INCLUDE) -o build/RTkGPIO_STATIC.o
+
+RTkGPIO_SHARED.o: checkbuild source/RTkGPIO.c
+		$(CC) $(CFLAGS) $(FPIC) -c source/RTkGPIO.c $(INCLUDE) -o build/RTkGPIO_SHARED.o
 
 serial.o: source/serial.c
 		$(CC) $(CFLAGS) -c source/serial.c -o build/serial.o
