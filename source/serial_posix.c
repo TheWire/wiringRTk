@@ -2,6 +2,7 @@
 #include <termios.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdio.h>
 
 //RTk.GPIO baud rate
 #define RTK_BAUD B230400
@@ -31,32 +32,12 @@ int setupSerial(int serialDevice) {
         	return -1;
     }
     */
-	cfsetispeed(&serialSettings, RTK_BAUD);
 	cfsetospeed(&serialSettings, RTK_BAUD);
-	//int iFlags = TIOCM_DTR;
-	//ioctl(serialDevice, TIOCMBIC, &iFlags);//off
-	//ioctl(serialDevice, TIOCMBIS, &iFlags);//on
-	//iFlags = 0;
-	//ioctl(serialDevice, TIOCMGET, &iFlags);
-	//iFlags |= TIOCM_RTS;
-	//iFlags &= ~TIOCM_RTS;
-	//ioctl(serialDevice, TIOCMSET, &iFlags);
 	serialSettings.c_cflag |= (CLOCAL | CREAD);
+	serialSettings.c_cflag &= ~CSIZE;
 	serialSettings.c_cflag |= CS8;
-	//serialSettings.c_cflag &= ~CSIZE;
 	serialSettings.c_cflag &= ~CSTOPB;
-	serialSettings.c_cflag &= ~(PARENB | PARODD);
-	serialSettings.c_cflag &= ~CRTSCTS;
-	serialSettings.c_iflag &= ~(IXON | IXOFF | IXANY);
-	//serialSettings.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG | ECHOK | ECHONL | IEXTEN);
-	//serialSettings.c_oflag &= ~(OPOST | ONLCR | OCRNL);
-	//serialSettings.c_iflag &= ~(INLCR | IGNCR | ICRNL | IGNBRK);
-	//serialSettings.c_iflag &= ~(INPCK | ISTRIP);
-	///serialSettings.c_iflag &= ~IUCLC;
-	//serialSettings.c_iflag &= ~PARMRK;
-	serialSettings.c_cc[VMIN] = 0;
-	serialSettings.c_cc[VTIME] = 10;
-	tcflush(serialDevice, TCIFLUSH);
+	serialSettings.c_cflag &= ~(PARENB | PARODD | CMSPAR);
 	if(tcsetattr(serialDevice, TCSANOW, &serialSettings) != 0) {
 		return -2;
 	}
