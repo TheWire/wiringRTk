@@ -25,55 +25,66 @@ FPIC = -fPIC
 ARCHIVER = ar
 ARCHIVER_ARGS = rcs
 INSTALL = install -c
-INSTALL_PATH = /usr/local/lib/
+SOURCE = source/
+BUILD = build/
+BIN = bin/
+INSTALL_PATH = /usr/local/
+INSTALL_LIB = lib/
+INSTALL_INCLUDE = include/
 
 all:libwiringRTk.so libRTkGPIO.so libwiringRTk.a libRTkGPIO.a
 
 libwiringRTk.so: checkbin wiringRTk.o RTkGPIO.o serial.o serial_posix.o find_serial.o delay.o
-		$(CC) $(CFLAGS) $(SHAREDLIB) build/wiringRTk.o build/RTkGPIO.o build/serial.o build/serial_posix.o build/find_serial.o build/delay.o $(LIBS) -o bin/shared/libwiringRTk.so
+		$(CC) $(CFLAGS) $(SHAREDLIB) $(BUILD)wiringRTk.o $(BUILD)RTkGPIO.o $(BUILD)serial.o $(BUILD)serial_posix.o $(BUILD)find_serial.o $(BUILD)delay.o $(LIBS) -o $(BIN)shared/libwiringRTk.so
 
 libRTkGPIO.so: checkbin RTkGPIO.o serial.o serial_posix.o find_serial.o delay.o
-		$(CC) $(CFLAGS) $(SHAREDLIB) build/RTkGPIO.o build/serial.o build/serial_posix.o build/find_serial.o build/delay.o $(LIBS) -o bin/shared/libRTkGPIO.so
+		$(CC) $(CFLAGS) $(SHAREDLIB) $(BUILD)RTkGPIO.o $(BUILD)serial.o $(BUILD)serial_posix.o $(BUILD)find_serial.o $(BUILD)delay.o $(LIBS) -o $(BIN)shared/libRTkGPIO.so
 
 libwiringRTk.a: checkbin wiringRTk.o RTkGPIO.o serial.o serial_posix.o find_serial.o delay.o
-		$(ARCHIVER) $(ARCHIVER_ARGS) bin/static/libwiringRTk.a build/wiringRTk.o build/RTkGPIO.o build/serial.o build/serial_posix.o build/find_serial.o build/delay.o $(LIBS)
+		$(ARCHIVER) $(ARCHIVER_ARGS) $(BIN)static/libwiringRTk.a $(BUILD)wiringRTk.o $(BUILD)RTkGPIO.o $(BUILD)serial.o $(BUILD)serial_posix.o $(BUILD)find_serial.o $(BUILD)delay.o $(LIBS)
 
 libRTkGPIO.a: checkbin RTkGPIO.o serial.o serial_posix.o find_serial.o delay.o
-		$(ARCHIVER) $(ARCHIVER_ARGS) bin/static/libRTkGPIO.a build/RTkGPIO.o build/serial.o build/serial_posix.o build/find_serial.o build/delay.o $(LIBS)  
+		$(ARCHIVER) $(ARCHIVER_ARGS) $(BIN)static/libRTkGPIO.a $(BUILD)RTkGPIO.o $(BUILD)serial.o $(BUILD)serial_posix.o $(BUILD)find_serial.o $(BUILD)delay.o $(LIBS)  
 
-wiringRTk.o: checkbuild source/wiringRTk.c
-		$(CC) $(CFLAGS) $(FPIC) -c source/wiringRTk.c $(INCLUDE) -o build/wiringRTk.o
+wiringRTk.o: checkbuild $(SOURCE)wiringRTk.c
+		$(CC) $(CFLAGS) $(FPIC) -c $(SOURCE)wiringRTk.c $(INCLUDE) -o $(BUILD)wiringRTk.o
 
-RTkGPIO.o: checkbuild source/RTkGPIO.c
-		$(CC) $(CFLAGS) $(FPIC) -c source/RTkGPIO.c $(INCLUDE) -o build/RTkGPIO.o
+RTkGPIO.o: checkbuild $(SOURCE)RTkGPIO.c
+		$(CC) $(CFLAGS) $(FPIC) -c $(SOURCE)RTkGPIO.c $(INCLUDE) -o $(BUILD)RTkGPIO.o
 
-serial.o: source/serial.c
-		$(CC) $(CFLAGS) $(FPIC) -c source/serial.c -o build/serial.o
+serial.o: $(SOURCE)serial.c
+		$(CC) $(CFLAGS) $(FPIC) -c $(SOURCE)serial.c -o $(BUILD)serial.o
 
-serial_posix.o: source/serial_posix.c
-		$(CC) $(CFLAGS) $(FPIC) -c source/serial_posix.c -o build/serial_posix.o
+serial_posix.o: $(SOURCE)serial_posix.c
+		$(CC) $(CFLAGS) $(FPIC) -c $(SOURCE)serial_posix.c -o $(BUILD)serial_posix.o
 
-find_serial.o: source/$(FIND_SERIAL)
-		$(CC) $(CFLAGS) $(FPIC) -c source/$(FIND_SERIAL) -o build/find_serial.o
+find_serial.o: $(SOURCE)$(FIND_SERIAL)
+		$(CC) $(CFLAGS) $(FPIC) -c $(SOURCE)$(FIND_SERIAL) -o $(BUILD)find_serial.o
 
-delay.o: source/$(DELAY)
-		$(CC) $(CFLAGS) $(FPIC) -c source/$(DELAY) -o build/delay.o
+delay.o: $(SOURCE)$(DELAY)
+		$(CC) $(CFLAGS) $(FPIC) -c $(SOURCE)$(DELAY) -o $(BUILD)delay.o
 
 clean:
-	@rm -rf build/*
-	@rm -rf bin/*
+	@rm -rf $(BUILD)*
+	@rm -rf $(BIN)*
 
 checkbuild:
-	@mkdir -p build/
+	@mkdir -p $(BUILD)
 
 checkbin:
-	@mkdir -p bin/static
-	@mkdir -p bin/shared
+	@mkdir -p $(BIN)static
+	@mkdir -p $(BIN)shared
 
 install:
-	$(INSTALL) ./bin/shared/libRTkGPIO.so $(INSTALL_PATH)
-	$(INSTALL) ./bin/shared/libwiringRTk.so $(INSTALL_PATH)
+	$(INSTALL) $(BIN)shared/libRTkGPIO.so $(INSTALL_PATH)$(INSTALL_LIB)
+	$(INSTALL) $(BIN)shared/libwiringRTk.so $(INSTALL_PATH)$(INSTALL_LIB)
+	$(INSTALL) $(SOURCE)RTkGPIO.h $(INSTALL_PATH)$(INSTALL_INCLUDE)
+	$(INSTALL) $(SOURCE)wiringRTk.h $(INSTALL_PATH)$(INSTALL_INCLUDE)
+	ldconfig
 
 uninstall:
-	rm $(INSTALL_PATH)libRTkGPIO.so
-	rm $(INSTALL_PATH)libwiringRTk.so
+	rm $(INSTALL_PATH)$(INSTALL_LIB)libRTkGPIO.so
+	rm $(INSTALL_PATH)$(INSTALL_LIB)libwiringRTk.so
+	rm $(INSTALL_PATH)$(INSTALL_INCLUDE)RTkGPIO.h
+	rm $(INSTALL_PATH)$(INSTALL_INCLUDE)wiringRTk.h
+	

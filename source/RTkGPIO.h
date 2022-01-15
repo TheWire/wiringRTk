@@ -1,4 +1,4 @@
-
+#ifndef _RTKGPIO_H_
 //setup wiringRTk using wiringPi pin layout
 //returns 0 for success -1 for failure.
 int RTk_wiringRTkSetup();
@@ -30,17 +30,24 @@ void RTk_delayMicroseconds (unsigned long howLong);
 void RTk_closeWiringRTk();
 
 //wiringPi api values
+#ifndef PHYS
+
 #define PHYS 0
 #define BCM 1
 #define WPI 2
+#endif
+
+#ifndef INPUT
 
 #define INPUT 0
-#define OUTPUT 2
+#define OUTPUT 1
 #define LOW 0
 #define HIGH 1
 #define PUD_OFF 0
 #define PUD_DOWN 1
 #define PUD_UP 2
+
+#endif
 
 //RTk.GPIO api values
 #define NUMPINS 28
@@ -57,3 +64,5 @@ void RTk_closeWiringRTk();
 #define GPIO_PULL_DOWN 'D'
 #define GPIO_PULL_UP 'U'
 #define GPIO_PULL_NONE 'N'
+
+#endif

@@ -1,3 +1,4 @@
+#ifndef _RTKSERIAL_H_
 //write byte to serial return number of bytes successfully written.
 int rtkWrite(int serialDevice, char byte);
 int rtkWriteMultiple(int serialDevice, char* buffer, int size);
@@ -8,3 +9,4 @@ int rtkRead(int serialDevice, void* buffer, int size);
 int getRTk(char* serialPath);
 //close serial handle.
 void closeRTk(int serialDevice);
+#endif
