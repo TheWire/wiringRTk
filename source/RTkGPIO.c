@@ -150,7 +150,7 @@ void RTk_pinMode(int pin, int mode) {
 
 //return whether input pin is HIGH or LOW
 int RTk_digitalRead(int pin) {
-	int ret, channel;
+	int channel;
 	char buffer[DIGITAL_READ_SIZE];
 	WiringRTkHandle *rtk = rtk_getRTkHandle();
 	channel = rtk_getChannel(pin);
@@ -158,8 +158,7 @@ int RTk_digitalRead(int pin) {
 	if(rtkWrite(rtk->serialDevice, channel) < 1) goto write_failed;
 	if(rtkWrite(rtk->serialDevice, GPIO_READ) < 1) goto write_failed;
 
-	ret = rtkRead(rtk->serialDevice, buffer, sizeof(buffer), '\n');
-	// printf("read ret: %d\n", ret);
+	rtkRead(rtk->serialDevice, buffer, sizeof(buffer), '\n');
 	// printf("%d %d %d %d\n", buffer[0], buffer[1], buffer[2], buffer[3]);
 	if(buffer[0] == channel) {
 		return rtk_getValueInput(buffer[1]);

@@ -40,7 +40,6 @@ int getID(char *path, char *file) {
 //return 1 if RTk found, 0 if not
 int identifyRTk(char *device) {
 	char *path, *device_path, *usb_device_path;
-	int idVendor, idProduct;
 	path = malloc(PATH_MAX + 1);
 	if(path == NULL) {fprintf(stderr, "malloc failed\n"); exit(1);}
 	strcpy(path, PATH_TO_SERIAL_DEVICES);

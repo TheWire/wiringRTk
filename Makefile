@@ -21,7 +21,7 @@ ifeq ($(UNAME_S),Darwin)
 endif
 
 CC=gcc
-CFLAGS=
+CFLAGS= -Wall
 LIBS= $(FIND_SERIAL_LIBS)
 INCLUDE=
 SHAREDLIB= -shared
