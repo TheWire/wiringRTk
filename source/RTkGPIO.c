@@ -167,6 +167,7 @@ int RTk_digitalRead(int pin) {
 	return -1;
 	write_failed:
 		fprintf(stderr, "RTk serial write failed");
+		return -1;
 }
 
 //set output pin to HIGH or LOW
