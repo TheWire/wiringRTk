@@ -10,12 +10,14 @@ ifeq ($(UNAME_S),Linux)
 	DELAY= delay_linux.c
 	FIND_SERIAL= find_serial_linux.c
 	FIND_SERIAL_LIBS=
+	REGISTER_LIB= ldconfig
 endif    
 ifeq ($(UNAME_S),Darwin)
 	OS= -D __OSX__
 	DELAY= delay_osx.c
 	FIND_SERIAL= find_serial_osx.c
 	FIND_SERIAL_LIBS= -framework IOKit -framework CoreFoundation
+	REGISTER_LIB=
 endif
 
 CC=gcc
@@ -75,7 +77,7 @@ install:
 	$(INSTALL) $(BIN)libwiringRTk.so $(INSTALL_PATH)$(INSTALL_LIB)
 	$(INSTALL) $(SOURCE)RTkGPIO.h $(INSTALL_PATH)$(INSTALL_INCLUDE)
 	$(INSTALL) $(SOURCE)wiringRTk.h $(INSTALL_PATH)$(INSTALL_INCLUDE)
-	ldconfig
+	$(REGISTER_LIB)
 
 uninstall:
 	rm $(INSTALL_PATH)$(INSTALL_LIB)libRTkGPIO.so
