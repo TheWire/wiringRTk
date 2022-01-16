@@ -16,9 +16,19 @@ int rtkWriteMultiple(int serialDevice, char* buffer, int size) {
 	return write(serialDevice, buffer, size);
 }
 
-//reads size number of bytes into buffer returns number of bytes read.
-int rtkRead(int serialDevice, void* buffer, int size) {
-	return read(serialDevice, buffer, size);
+//reads up to size number of bytes into buffer until term character 
+//returns number of bytes read.
+int rtkRead(int serialDevice, char* buffer, int size, char termChar) {
+	int amountRead = 0;
+	while(amountRead < size) {
+		char data;
+		if(read(serialDevice, &data, 1) > 0) {
+			if(data == termChar) return amountRead;
+			buffer[amountRead] = data;
+			amountRead++;
+		}
+	}
+	return amountRead;
 }
 
 //close serial handle.

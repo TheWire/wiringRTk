@@ -143,8 +143,9 @@ void RTk_pinMode(int pin, int mode) {
 	int ret = rtkWriteMultiple(rtk->serialDevice, buffer, WRITE_SIZE);
 	if(ret < WRITE_SIZE) {fprintf(stderr, "RTk serial write failed");}
 	free(buffer);
-	RTk_pullUpDnControl(pin, PUD_OFF);
-	RTk_digitalWrite(pin, LOW);
+	if(mode == OUTPUT) {
+		RTk_pullUpDnControl(pin, PUD_OFF);
+	}
 }
 
 //return whether input pin is HIGH or LOW
@@ -153,15 +154,19 @@ int RTk_digitalRead(int pin) {
 	char buffer[DIGITAL_READ_SIZE];
 	WiringRTkHandle *rtk = rtk_getRTkHandle();
 	channel = rtk_getChannel(pin);
-	ret = rtkWrite(rtk->serialDevice, channel);
-	ret = rtkWrite(rtk->serialDevice, GPIO_READ);
-	rtkRead(rtk->serialDevice, buffer, sizeof(buffer));
-	printf("%d %d %d %d\n", buffer[0], buffer[1], buffer[2], buffer[3]);
+
+	if(rtkWrite(rtk->serialDevice, channel) < 1) goto write_failed;
+	if(rtkWrite(rtk->serialDevice, GPIO_READ) < 1) goto write_failed;
+
+	ret = rtkRead(rtk->serialDevice, buffer, sizeof(buffer), '\n');
+	// printf("read ret: %d\n", ret);
+	// printf("%d %d %d %d\n", buffer[0], buffer[1], buffer[2], buffer[3]);
 	if(buffer[0] == channel) {
 		return rtk_getValueInput(buffer[1]);
 	}
 	return -1;
-	
+	write_failed:
+		fprintf(stderr, "RTk serial write failed");
 }
 
 //set output pin to HIGH or LOW
@@ -187,6 +192,7 @@ void RTk_pullUpDnControl(int pin, int pud) {
 	buffer[1] = rtk_getPUD(pud);
 	int ret = rtkWriteMultiple(rtk->serialDevice, buffer, WRITE_SIZE);
 	if(ret < WRITE_SIZE) {fprintf(stderr, "RTk serial write failed");}
+	RTk_digitalWrite(pin, LOW);
 	free(buffer);
 }
 
